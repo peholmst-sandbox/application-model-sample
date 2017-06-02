@@ -46,7 +46,7 @@ public class DomainEvents {
      *
      * @param <T>
      */
-    interface Listener<T> {
+    public interface Listener<T> {
 
         /**
          *
@@ -58,7 +58,7 @@ public class DomainEvents {
     /**
      *
      */
-    interface ListenerRegistration {
+    public interface ListenerRegistration {
 
         /**
          *

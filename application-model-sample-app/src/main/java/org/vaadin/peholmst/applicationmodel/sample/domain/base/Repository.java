@@ -2,6 +2,7 @@ package org.vaadin.peholmst.applicationmodel.sample.domain.base;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * TODO document me
@@ -35,7 +36,19 @@ public class Repository<E extends Entity> {
      * @return
      */
     public synchronized List<E> findAll() {
-        return entityStore.values().stream().map(this::copy).collect(Collectors.toList());
+        return stream().map(this::copy).collect(Collectors.toList());
+    }
+
+    /**
+     * 
+     * @return
+     */
+    protected Stream<E> stream() {
+        return entityStore.values().stream().sorted(getDefaultComparator());
+    }
+
+    protected Comparator<E> getDefaultComparator() {
+        return Comparator.comparing(e -> e.getUuid().toString());
     }
 
     /**
@@ -43,7 +56,7 @@ public class Repository<E extends Entity> {
      * @param entity
      * @return
      */
-    private E copy(E entity) {
+    protected E copy(E entity) {
         try {
             return entityClass.getConstructor(entityClass).newInstance(entity);
         } catch (Exception ex) {
@@ -57,6 +70,6 @@ public class Repository<E extends Entity> {
      * @return
      */
     public synchronized Optional<E> findByUuid(UUID uuid) {
-        return Optional.ofNullable(entityStore.get(uuid));
+        return Optional.ofNullable(entityStore.get(uuid)).map(this::copy);
     }
 }

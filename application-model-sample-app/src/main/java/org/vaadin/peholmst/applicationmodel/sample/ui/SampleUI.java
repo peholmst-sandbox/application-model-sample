@@ -2,6 +2,7 @@ package org.vaadin.peholmst.applicationmodel.sample.ui;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
@@ -12,6 +13,7 @@ import com.vaadin.ui.UI;
  * Main UI for the sample application.
  */
 @Theme("mytheme")
+@Push
 public class SampleUI extends UI {
 
     @Override

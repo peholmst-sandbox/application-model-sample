@@ -1,7 +1,8 @@
 package org.vaadin.peholmst.applicationmodel.framework.eventbus;
 
 import java.util.Collection;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import com.vaadin.shared.Registration;
@@ -11,7 +12,7 @@ import com.vaadin.shared.Registration;
  */
 public class EventBus {
 
-    private final Collection<ContextualEventBusListener> eventBusListeners = new ConcurrentSkipListSet<>();
+    private final Collection<ContextualEventBusListener> eventBusListeners = new HashSet<>();
     private final ExecutorService eventProcessor;
 
     /**
@@ -27,7 +28,11 @@ public class EventBus {
      * @param event
      */
     public void publish(Object event) {
-        eventBusListeners.forEach(listener -> eventProcessor.submit(() -> listener.onEvent(event)));
+        Set<EventBusListener> listeners;
+        synchronized (eventBusListeners) {
+            listeners = new HashSet<>(eventBusListeners);
+        }
+        listeners.forEach(listener -> eventProcessor.submit(() -> listener.onEvent(event)));
     }
 
     /**
@@ -37,7 +42,13 @@ public class EventBus {
      */
     public Registration subscribe(EventBusListener eventBusListener) {
         ContextualEventBusListener listener = new ContextualEventBusListener(eventBusListener);
-        eventBusListeners.add(listener);
-        return (Registration) () -> eventBusListeners.remove(listener);
+        synchronized (eventBusListeners) {
+            eventBusListeners.add(listener);
+        }
+        return (Registration) () -> {
+            synchronized (eventBusListeners) {
+                eventBusListeners.remove(listener);
+            }
+        };
     }
 }

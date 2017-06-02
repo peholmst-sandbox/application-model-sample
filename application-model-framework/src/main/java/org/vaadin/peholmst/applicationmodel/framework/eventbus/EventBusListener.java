@@ -5,6 +5,7 @@ import com.vaadin.event.SerializableEventListener;
 /**
  * TODO Document me!
  */
+@FunctionalInterface
 public interface EventBusListener extends SerializableEventListener {
 
     /**

@@ -8,6 +8,7 @@ import java.util.Objects;
 import org.vaadin.peholmst.applicationmodel.framework.Property;
 import org.vaadin.peholmst.applicationmodel.framework.WritableProperty;
 import org.vaadin.peholmst.applicationmodel.sample.domain.Coordinates;
+import org.vaadin.peholmst.applicationmodel.sample.domain.Ticket;
 import org.vaadin.peholmst.applicationmodel.sample.domain.TicketType;
 import org.vaadin.peholmst.applicationmodel.sample.domain.gis.Accuracy;
 import org.vaadin.peholmst.applicationmodel.sample.domain.gis.GeoService;
@@ -35,14 +36,29 @@ public class TicketFormModel implements Serializable {
     private final WritableProperty<String> details = new WritableProperty<>();
     private final WritableProperty<String> caller = new WritableProperty<>();
     private final WritableProperty<String> callerPhone = new WritableProperty<>();
-
+    private final Property<Ticket> currentTicket;
     private final SerializableSupplier<GeoService> geoService;
 
-    public TicketFormModel(SerializableSupplier<GeoService> geoService) {
+    public TicketFormModel(SerializableSupplier<GeoService> geoService, Property<Ticket> currentTicket) {
         this.geoService = Objects.requireNonNull(geoService);
+        this.currentTicket = Objects.requireNonNull(currentTicket);
+        currentTicket.addValueChangeListener(this::onCurrentTicketChanged);
         coordinates.addValueChangeListener(this::onCoordinatesChanged);
         address.addValueChangeListener(this::onAddressChanged);
         placeSelection.addValueChangeListener(this::onPlaceSelectionChanged);
+    }
+
+    private void onCurrentTicketChanged(Property.ValueChangeEvent<Ticket> event) {
+        event.getNewValue().ifPresent(ticket -> {
+            address.setValue(ticket.getAddress());
+            coordinates.setValue(ticket.getLocation());
+            coordinateAccuracy.setValue(ticket.getLocationAccuracy());
+            addressDetails.setValue(ticket.getAddressDetails());
+            type.setValue(ticket.getType());
+            details.setValue(ticket.getDetails());
+            caller.setValue(ticket.getCaller());
+            callerPhone.setValue(ticket.getCallerPhone());
+        });
     }
 
     private void onCoordinatesChanged(Property.ValueChangeEvent<Coordinates> event) {
